@@ -1,0 +1,7 @@
+[run]
+branch = True
+source = bareon_api
+omit = bareon_api/openstack/*
+
+[report]
+ignore_errors = True
