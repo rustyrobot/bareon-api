@@ -31,6 +31,70 @@ def get_or_404(model, obj_id):
         pecan.abort(404)
 
 
+class PartitioningCotroller(rest.RestController):
+
+    @pecan.expose(template='json')
+    def get(self, node_id):
+        node_id = int(node_id)
+        data = {
+            'fss': [
+                {
+                    'device': '/dev/kurnik/kogut',
+                    'fs_label': 'kogut',
+                    'fs_type': 'ext2',
+                    'mount': '/tmp/kogutek',
+                },
+            ],
+            "lvs": [
+                {
+                    "name": "kogut",
+                    "size": 96,
+                    "vgname": "kurnik"
+                },
+                {
+                    "name": "kura",
+                    "size": 69,
+                    "vgname": "kurnik"
+                }
+            ],
+            'parteds': [
+                {
+                    'label': 'gpt',
+                    'name': '/dev/vdc',
+                    'partitions': [
+                        {
+                            'begin': 1,
+                            'configdrive': False,
+                            'count': 1,
+                            'device': '/dev/vdc',
+                            'end': 20000,
+                            'flags': ['bios_grub'],
+                            'guid': None,
+                            'name': '/dev/vdc1',
+                            'partition_type': 'primary',
+                        },
+                    ],
+                },
+            ],
+            'pvs': [
+                {
+                    'metadatacopies': 2,
+                    'metadatasize': 28,
+                    'name': '/dev/vdc1',
+                },
+            ],
+            'vgs': [
+                {
+                    'name': 'kurnik',
+                    'pvnames': [
+                        '/dev/vdc1',
+                    ],
+                },
+            ],
+        }
+        return data
+
+
 class DisksController(rest.RestController):
 
     @pecan.expose(template='json')
@@ -51,6 +115,7 @@ class DisksController(rest.RestController):
 class NodesController(rest.RestController):
 
     disks = DisksController()
+    partitioning = PartitioningCotroller()
 
     @pecan.expose(template='json')
     def get_one(self, node_id):
