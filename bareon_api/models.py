@@ -13,6 +13,19 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from fuel_agent import objects
+
+
+class JsonifyMixin(object):
+    """Allows to easily serialize fuel_agent's objects to JSON"""
+
+    def __json__(self):
+        return self.to_dict()
+
+
+class LogicalVolume(JsonifyMixin, objects.LV):
+    pass
+
 
 EXAMPLE_NODE_ID = 1
 
@@ -46,5 +59,21 @@ NODES = {
         'host': 'some-host',
         'ssh_key': 'some-ssh-key',
         'disks': DISKS[EXAMPLE_NODE_ID],
+    },
+}
+
+
+LVS = {
+    EXAMPLE_NODE_ID: {
+        'kura': LogicalVolume(
+            name='kura',
+            size=69,
+            vgname='kurnik'
+        ),
+        'kogut': LogicalVolume(
+            name='kogut',
+            size=96,
+            vgname='kurnik'
+        )
     },
 }

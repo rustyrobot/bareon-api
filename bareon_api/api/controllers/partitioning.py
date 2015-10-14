@@ -31,11 +31,31 @@ def get_or_404(model, obj_id):
         pecan.abort(404)
 
 
+class LVController(rest.RestController):
+
+    @pecan.expose(template='json')
+    def get_one(self, node_id, name):
+        node_id = int(node_id)
+        node_lvs = get_or_404(models.LVS, node_id)
+        return get_or_404(node_lvs, name)
+
+    @pecan.expose(template='json')
+    def get_all(self, node_id):
+        node_id = int(node_id)
+        return get_or_404(models.LVS, node_id)
+
+
 class PartitioningCotroller(rest.RestController):
 
     @pecan.expose(template='json')
     def get(self, node_id):
         node_id = int(node_id)
+
+        if node_id not in models.NODES:
+            pecan.abort(404)
+
+        lvs = models.LVS[node_id].values()
+
         data = {
             'fss': [
                 {
@@ -45,18 +65,7 @@ class PartitioningCotroller(rest.RestController):
                     'mount': '/tmp/kogutek',
                 },
             ],
-            "lvs": [
-                {
-                    "name": "kogut",
-                    "size": 96,
-                    "vgname": "kurnik"
-                },
-                {
-                    "name": "kura",
-                    "size": 69,
-                    "vgname": "kurnik"
-                }
-            ],
+            "lvs": lvs,
             'parteds': [
                 {
                     'label': 'gpt',
@@ -115,6 +124,7 @@ class DisksController(rest.RestController):
 class NodesController(rest.RestController):
 
     disks = DisksController()
+    lvs = LVController()
     partitioning = PartitioningCotroller()
 
     @pecan.expose(template='json')
