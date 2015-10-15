@@ -23,7 +23,15 @@ class JsonifyMixin(object):
         return self.to_dict()
 
 
+class FileSystem(JsonifyMixin, objects.FS):
+    pass
+
+
 class LogicalVolume(JsonifyMixin, objects.LV):
+    pass
+
+
+class PhysicalVolume(JsonifyMixin, objects.PV):
     pass
 
 
@@ -66,6 +74,19 @@ NODES = {
     },
 }
 
+FSS = {
+    EXAMPLE_NODE_ID: {
+        # ???(prmtl) now we identify file system by lablel
+        # but should be considered to find a better way
+        'kogut': FileSystem(
+            device='/dev/kurnik/kogut',
+            fs_label='kogut',
+            fs_type='ext2',
+            mount='/tmp/kogutek'
+        ),
+
+    }
+}
 
 LVS = {
     EXAMPLE_NODE_ID: {
@@ -87,8 +108,18 @@ VGS = {
         'kurnik': VolumeGroup(
             name='kurnik',
             pvnames=[
-                '/dev/vdc1',
+                'vdc1',
             ],
+        )
+    }
+}
+
+PVS = {
+    EXAMPLE_NODE_ID: {
+        'vdc1': PhysicalVolume(
+            name='vdc1',
+            metadatacopies=2,
+            metadatasize=28,
         )
     }
 }

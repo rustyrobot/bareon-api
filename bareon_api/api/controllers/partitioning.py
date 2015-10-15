@@ -63,9 +63,19 @@ class SimpleRestController(rest.RestController):
         pecan.abort(204)
 
 
+class FSController(SimpleRestController):
+    model = models.FileSystem
+    collection = models.FSS
+
+
 class LVController(SimpleRestController):
     model = models.LogicalVolume
     collection = models.LVS
+
+
+class PVController(SimpleRestController):
+    model = models.PhysicalVolume
+    collection = models.PVS
 
 
 class VGController(SimpleRestController):
@@ -82,18 +92,13 @@ class PartitioningCotroller(rest.RestController):
         if node_id not in models.NODES:
             pecan.abort(404)
 
+        fss = models.FSS[node_id].values()
         lvs = models.LVS[node_id].values()
+        pvs = models.PVS[node_id].values()
         vgs = models.VGS[node_id].values()
 
         data = {
-            'fss': [
-                {
-                    'device': '/dev/kurnik/kogut',
-                    'fs_label': 'kogut',
-                    'fs_type': 'ext2',
-                    'mount': '/tmp/kogutek',
-                },
-            ],
+            'fss': fss,
             "lvs": lvs,
             'parteds': [
                 {
@@ -114,13 +119,7 @@ class PartitioningCotroller(rest.RestController):
                     ],
                 },
             ],
-            'pvs': [
-                {
-                    'metadatacopies': 2,
-                    'metadatasize': 28,
-                    'name': '/dev/vdc1',
-                },
-            ],
+            'pvs': pvs,
             'vgs': vgs,
         }
         return data
@@ -146,7 +145,9 @@ class DisksController(rest.RestController):
 class NodesController(rest.RestController):
 
     disks = DisksController()
+    fss = FSController()
     lvs = LVController()
+    pvs = PVController()
     vgs = VGController()
     partitioning = PartitioningCotroller()
 
