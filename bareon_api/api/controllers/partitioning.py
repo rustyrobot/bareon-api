@@ -31,18 +31,46 @@ def get_or_404(model, obj_id):
         pecan.abort(404)
 
 
-class LVController(rest.RestController):
+class SimpleRestController(rest.RestController):
+
+    model = None
+    collection = None
 
     @pecan.expose(template='json')
     def get_one(self, node_id, name):
         node_id = int(node_id)
-        node_lvs = get_or_404(models.LVS, node_id)
-        return get_or_404(node_lvs, name)
+        objs = get_or_404(self.collection, node_id)
+        return get_or_404(objs, name)
 
     @pecan.expose(template='json')
     def get_all(self, node_id):
         node_id = int(node_id)
-        return get_or_404(models.LVS, node_id)
+        return get_or_404(self.collection, node_id)
+
+    @pecan.expose(template='json')
+    def put(self, node_id, name):
+        node_id = int(node_id)
+        objs = get_or_404(self.collection, node_id)
+        objs[name] = self.model(**pecan.request.json)
+        return objs[name]
+
+    @pecan.expose(template='json')
+    def delete(self, node_id, name):
+        node_id = int(node_id)
+        objs = get_or_404(self.collection, node_id)
+        get_or_404(objs, name)
+        del objs[name]
+        pecan.abort(204)
+
+
+class LVController(SimpleRestController):
+    model = models.LogicalVolume
+    collection = models.LVS
+
+
+class VGController(SimpleRestController):
+    model = models.VolumeGroup
+    collection = models.LVS
 
 
 class PartitioningCotroller(rest.RestController):
@@ -55,6 +83,7 @@ class PartitioningCotroller(rest.RestController):
             pecan.abort(404)
 
         lvs = models.LVS[node_id].values()
+        vgs = models.VGS[node_id].values()
 
         data = {
             'fss': [
@@ -92,14 +121,7 @@ class PartitioningCotroller(rest.RestController):
                     'name': '/dev/vdc1',
                 },
             ],
-            'vgs': [
-                {
-                    'name': 'kurnik',
-                    'pvnames': [
-                        '/dev/vdc1',
-                    ],
-                },
-            ],
+            'vgs': vgs,
         }
         return data
 
@@ -125,6 +147,7 @@ class NodesController(rest.RestController):
 
     disks = DisksController()
     lvs = LVController()
+    vgs = VGController()
     partitioning = PartitioningCotroller()
 
     @pecan.expose(template='json')

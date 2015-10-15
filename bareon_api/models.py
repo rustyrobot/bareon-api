@@ -27,6 +27,10 @@ class LogicalVolume(JsonifyMixin, objects.LV):
     pass
 
 
+class VolumeGroup(JsonifyMixin, objects.VG):
+    pass
+
+
 EXAMPLE_NODE_ID = 1
 
 
@@ -76,4 +80,15 @@ LVS = {
             vgname='kurnik'
         )
     },
+}
+
+VGS = {
+    EXAMPLE_NODE_ID: {
+        'kurnik': VolumeGroup(
+            name='kurnik',
+            pvnames=[
+                '/dev/vdc1',
+            ],
+        )
+    }
 }
