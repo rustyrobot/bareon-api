@@ -83,6 +83,47 @@ class VGController(SimpleRestController):
     collection = models.LVS
 
 
+class PartitionController(rest.RestController):
+    model = models.Partition
+    collection = models.PARTITIONS
+
+    @pecan.expose(template='json')
+    def get_one(self, node_id, parted_name, partition_name):
+        node_id = int(node_id)
+        node_parteds = get_or_404(self.collection, node_id)
+        partitions = get_or_404(node_parteds, parted_name)
+        return get_or_404(partitions, partition_name)
+
+    @pecan.expose(template='json')
+    def get_all(self, node_id, parted_name):
+        node_id = int(node_id)
+        node_parteds = get_or_404(self.collection, node_id)
+        return get_or_404(node_parteds, parted_name)
+
+    @pecan.expose(template='json')
+    def put(self, node_id, parted_name, partition_name):
+        node_id = int(node_id)
+        node_parteds = get_or_404(self.collection, node_id)
+        partitions = get_or_404(node_parteds, parted_name)
+        partitions[partition_name] = self.model(**pecan.request.json)
+        return partitions[partition_name]
+
+    @pecan.expose(template='json')
+    def delete(self, node_id, parted_name, partition_name):
+        node_id = int(node_id)
+        node_parteds = get_or_404(self.collection, node_id)
+        partitions = get_or_404(node_parteds, parted_name)
+        del partitions[partition_name]
+        pecan.abort(204)
+
+
+class PartedController(SimpleRestController):
+    model = models.Parted
+    collection = models.PARTEDS
+
+    partitions = PartitionController()
+
+
 class PartitioningCotroller(rest.RestController):
 
     @pecan.expose(template='json')
@@ -94,34 +135,18 @@ class PartitioningCotroller(rest.RestController):
 
         fss = models.FSS[node_id].values()
         lvs = models.LVS[node_id].values()
+        parteds = models.PARTEDS[node_id]
         pvs = models.PVS[node_id].values()
         vgs = models.VGS[node_id].values()
 
         data = {
             'fss': fss,
             "lvs": lvs,
-            'parteds': [
-                {
-                    'label': 'gpt',
-                    'name': '/dev/vdc',
-                    'partitions': [
-                        {
-                            'begin': 1,
-                            'configdrive': False,
-                            'count': 1,
-                            'device': '/dev/vdc',
-                            'end': 20000,
-                            'flags': ['bios_grub'],
-                            'guid': None,
-                            'name': '/dev/vdc1',
-                            'partition_type': 'primary',
-                        },
-                    ],
-                },
-            ],
+            'parteds': parteds,
             'pvs': pvs,
             'vgs': vgs,
         }
+
         return data
 
 
@@ -147,6 +172,7 @@ class NodesController(rest.RestController):
     disks = DisksController()
     fss = FSController()
     lvs = LVController()
+    parteds = PartedController()
     pvs = PVController()
     vgs = VGController()
     partitioning = PartitioningCotroller()

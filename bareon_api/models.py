@@ -31,6 +31,14 @@ class LogicalVolume(JsonifyMixin, objects.LV):
     pass
 
 
+class Parted(JsonifyMixin, objects.Parted):
+    pass
+
+
+class Partition(JsonifyMixin, objects.Partition):
+    pass
+
+
 class PhysicalVolume(JsonifyMixin, objects.PV):
     pass
 
@@ -108,16 +116,42 @@ VGS = {
         'kurnik': VolumeGroup(
             name='kurnik',
             pvnames=[
-                'vdc1',
+                '/dev/vdc1',
             ],
         )
     }
 }
 
+PARTITIONS = {
+    EXAMPLE_NODE_ID: {
+        'vdc': {
+            'vdc1': Partition(
+                name='/dev/vdc1',
+                device='/dev/vdc',
+                count=1,
+                partition_type='primary',
+                begin=1,
+                end=20000,
+            )
+        }
+    }
+}
+
+PARTEDS = {
+    EXAMPLE_NODE_ID: {
+        'vdc': Parted(
+            label='gpt',
+            name='/dev/vdc',
+            partitions=PARTITIONS[EXAMPLE_NODE_ID]['vdc'].values()
+        )
+    }
+}
+
+
 PVS = {
     EXAMPLE_NODE_ID: {
         'vdc1': PhysicalVolume(
-            name='vdc1',
+            name='/dev/vdc1',
             metadatacopies=2,
             metadatasize=28,
         )
