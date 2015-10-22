@@ -83,6 +83,11 @@ class VGController(SimpleRestController):
     collection = models.LVS
 
 
+# TODO figure out the terminology, the handler
+# returns not only partitionins, but also
+# volume groups, logical volumes etc. Some
+# time ago we had an idea to call these entities
+# `spaces` not to confuse it with real partitions
 class PartitionController(rest.RestController):
     model = models.Partition
     collection = models.PARTITIONS
