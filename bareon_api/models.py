@@ -13,8 +13,10 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from fuel_agent import objects
 from copy import deepcopy
+import random
+
+from fuel_agent import objects
 
 
 class JsonifyMixin(object):
@@ -48,15 +50,12 @@ class VolumeGroup(JsonifyMixin, objects.VG):
     pass
 
 
-EXAMPLE_NODE_ID = 1
-
-
 DISKS_TEMPLATE = {
     'disk': 'disk/by-path/pci-0000:00:0b.0-virtio-pci-virtio2',
     'extra': ['disk/by-id/virtio-8140d936d3ee4b04a6b5'],
     'model': None,
     'name': 'sda',
-    # TODO this information mustn't be hardcoded in the agent [1],
+    # TODO(rustyrobot) this information mustn't be hardcoded in the agent [1],
     # instead discovery should provide all required data as is
     # so after that service can determine which device is really
     # removable
@@ -64,7 +63,7 @@ DISKS_TEMPLATE = {
     # [1] https://github.com/openstack/fuel-nailgun-agent/blob
     #                       /abab45cf8c7344d43acd3858c02d7a648ef7fee6/agent#L41-L52
     'removable': '0',
-    # TODO figure out what we should use internally, probably
+    # TODO(rustyrobot figure out what we should use internally, probably
     # megabytes, even if discovery provides bytes [1]
     #
     # [1] https://github.com/openstack/fuel-web/blob
@@ -137,18 +136,31 @@ PV = {
 }
 
 
+def random_mac():
+    mac = [
+        0x00, 0x24, 0x81,
+        random.randint(0x00, 0x7f),
+        random.randint(0x00, 0xff),
+        random.randint(0x00, 0xff)
+    ]
+    return ':'.join(map(lambda x: "%02x" % x, mac))
+
+
 def generate_nodes_disks(count):
     nodes = {}
     disks = {}
-    for i in xrange(count):
-        # Start indexes from 1
-        idx = i + 1;
+    for _ in xrange(count):
+        mac = random_mac()
 
-        disks[idx] = [deepcopy(DISKS_TEMPLATE)]
-        nodes[idx] = {
+        disks[mac] = [deepcopy(DISKS_TEMPLATE)]
+        nodes[mac] = {
             'host': 'some-host',
             'ssh_key': 'some-ssh-key',
-            'disks': disks[idx],
+            'disks': disks[mac],
+            # NOTE(prmtl): it really doesn't matter if it's mac
+            # or anything as long as it is consistent between
+            # services in PoC
+            'id': mac,
         }
 
     return nodes, disks
@@ -162,13 +174,13 @@ def generate_spaces(nodes):
     vgs = {}
     lvs = {}
 
-    for idx in nodes.keys():
-        fss[idx] = deepcopy(FS)
-        partitions[idx] = deepcopy(PARTITION)
-        parteds[idx] = deepcopy(PARTED)
-        pvs[idx] = deepcopy(PV)
-        vgs[idx] = deepcopy(VG)
-        lvs[idx] = deepcopy(LV)
+    for mac in nodes.keys():
+        fss[mac] = deepcopy(FS)
+        partitions[mac] = deepcopy(PARTITION)
+        parteds[mac] = deepcopy(PARTED)
+        pvs[mac] = deepcopy(PV)
+        vgs[mac] = deepcopy(VG)
+        lvs[mac] = deepcopy(LV)
 
     return fss, partitions, parteds, pvs, vgs, lvs
 

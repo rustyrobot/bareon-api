@@ -38,25 +38,25 @@ class SimpleRestController(rest.RestController):
 
     @pecan.expose(template='json')
     def get_one(self, node_id, name):
-        node_id = int(node_id)
+        node_id = node_id.lower()
         objs = get_or_404(self.collection, node_id)
         return get_or_404(objs, name)
 
     @pecan.expose(template='json')
     def get_all(self, node_id):
-        node_id = int(node_id)
+        node_id = node_id.lower()
         return get_or_404(self.collection, node_id)
 
     @pecan.expose(template='json')
     def put(self, node_id, name):
-        node_id = int(node_id)
+        node_id = node_id.lower()
         objs = get_or_404(self.collection, node_id)
         objs[name] = self.model(**pecan.request.json)
         return objs[name]
 
     @pecan.expose(template='json')
     def delete(self, node_id, name):
-        node_id = int(node_id)
+        node_id = node_id.lower()
         objs = get_or_404(self.collection, node_id)
         get_or_404(objs, name)
         del objs[name]
@@ -94,20 +94,20 @@ class PartitionController(rest.RestController):
 
     @pecan.expose(template='json')
     def get_one(self, node_id, parted_name, partition_name):
-        node_id = int(node_id)
+        node_id = node_id.lower()
         node_parteds = get_or_404(self.collection, node_id)
         partitions = get_or_404(node_parteds, parted_name)
         return get_or_404(partitions, partition_name)
 
     @pecan.expose(template='json')
     def get_all(self, node_id, parted_name):
-        node_id = int(node_id)
+        node_id = node_id.lower()
         node_parteds = get_or_404(self.collection, node_id)
         return get_or_404(node_parteds, parted_name)
 
     @pecan.expose(template='json')
     def put(self, node_id, parted_name, partition_name):
-        node_id = int(node_id)
+        node_id = node_id.lower()
         node_parteds = get_or_404(self.collection, node_id)
         partitions = get_or_404(node_parteds, parted_name)
         partitions[partition_name] = self.model(**pecan.request.json)
@@ -115,7 +115,7 @@ class PartitionController(rest.RestController):
 
     @pecan.expose(template='json')
     def delete(self, node_id, parted_name, partition_name):
-        node_id = int(node_id)
+        node_id = node_id.lower()
         node_parteds = get_or_404(self.collection, node_id)
         partitions = get_or_404(node_parteds, parted_name)
         del partitions[partition_name]
@@ -133,7 +133,7 @@ class PartitioningCotroller(rest.RestController):
 
     @pecan.expose(template='json')
     def get(self, node_id):
-        node_id = int(node_id)
+        node_id = node_id.lower()
 
         if node_id not in models.NODES:
             pecan.abort(404)
@@ -159,7 +159,7 @@ class DisksController(rest.RestController):
 
     @pecan.expose(template='json')
     def get_one(self, node_id, disk_id):
-        node_id = int(node_id)
+        node_id = node_id.lower()
         # NOTE(prmtl): since this is just a list, lets not
         # force to use ids starting with 0
         disk_id = int(disk_id) - 1
@@ -168,7 +168,7 @@ class DisksController(rest.RestController):
 
     @pecan.expose(template='json')
     def get_all(self, node_id):
-        node_id = int(node_id)
+        node_id = node_id.lower()
         return get_or_404(models.DISKS, node_id)
 
 
@@ -184,12 +184,12 @@ class NodesController(rest.RestController):
 
     @pecan.expose(template='json')
     def get_one(self, node_id):
-        node_id = int(node_id)
+        node_id = node_id.lower()
         return get_or_404(models.NODES, node_id)
 
     @pecan.expose(template='json')
     def put(self, node_id):
-        node_id = int(node_id)
+        node_id = node_id.lower()
         models.NODES[node_id] = pecan.request.json
         return models.NODES[node_id]
 
