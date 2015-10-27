@@ -140,13 +140,13 @@ class PartitioningCotroller(rest.RestController):
 
         fss = models.FSS[node_id].values()
         lvs = models.LVS[node_id].values()
-        parteds = models.PARTEDS[node_id]
+        parteds = models.PARTEDS[node_id].values()
         pvs = models.PVS[node_id].values()
         vgs = models.VGS[node_id].values()
 
         data = {
             'fss': fss,
-            "lvs": lvs,
+            'lvs': lvs,
             'parteds': parteds,
             'pvs': pvs,
             'vgs': vgs,
