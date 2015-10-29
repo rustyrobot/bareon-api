@@ -242,7 +242,8 @@ def generate_spaces(nodes, disks):
     lvs = {}
 
     for mac in nodes.keys():
-        if not DISKS[mac]:
+        if not DISKS.get(mac):
+            print('Cannot find disks for node {0}'.format(mac))
             continue
 
         disk = DISKS[mac][0]
@@ -257,6 +258,7 @@ def generate_spaces(nodes, disks):
     return fss, partitions, parteds, pvs, vgs, lvs
 
 
+# TODO In memory storage for POC purpose should be replaces with oslo.db
 NODES = {}
 DISKS = {}
 
@@ -266,6 +268,13 @@ PARTEDS = {}
 PVS = {}
 VGS = {}
 LVS = {}
-NODES, DISKS = get_nodes_and_disks()
 
-FSS, PARTITIONS, PARTEDS, PVS, VGS, LVS = generate_spaces(NODES, DISKS)
+
+def set_spaces(*args):
+    global NODES, DISKS
+    NODES, DISKS = args
+
+
+def set_nodes_and_disks(*args):
+    global FSS, PARTITIONS, PARTEDS, PVS, VGS, LVS
+    (FSS, PARTITIONS, PARTEDS, PVS, VGS, LVS) = args
