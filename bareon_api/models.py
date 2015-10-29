@@ -219,7 +219,10 @@ def get_nodes_and_disks():
     nodes = {}
     disks = {}
     for node in get_nodes_discovery_data():
-        disks[node['mac']] = filter_disks(node.get('discovery', {}).get('block_device', {}))
+        if node.get('discovery') is None:
+            node['discovery'] = None
+
+        disks[node['mac']] = filter_disks(node['discovery'].get('block_device', {}))
         nodes[node['mac']] = {
             'disks': disks[node['mac']],
             # NOTE(prmtl): it really doesn't matter if it's mac
